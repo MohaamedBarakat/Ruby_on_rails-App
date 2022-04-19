@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220418203921) do
+ActiveRecord::Schema.define(version: 20220419000040) do
 
   create_table "applications", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.string   "token",                  null: false
@@ -31,10 +31,11 @@ ActiveRecord::Schema.define(version: 20220418203921) do
   end
 
   create_table "messages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
-    t.integer  "number",     null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer  "chats_id",   null: false
+    t.integer  "number",                   null: false
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
+    t.integer  "chats_id",                 null: false
+    t.text     "body",       limit: 65535, null: false
     t.index ["chats_id"], name: "index_messages_on_chats_id", using: :btree
   end
 
