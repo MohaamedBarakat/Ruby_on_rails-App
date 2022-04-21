@@ -1,4 +1,4 @@
 class Chat < ApplicationRecord
-    belongs_to :applications
+    belongs_to :applications, optional: true
     has_many :messages
 end

@@ -5,6 +5,7 @@ class ApplicationsController < ApplicationController
   end
 
   def create
+    #ChatAppJob.set(wait: 10.seconds).perform_later
     begin
       generated_token = generate_token
 

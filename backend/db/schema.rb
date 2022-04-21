@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20220419000040) do
+ActiveRecord::Schema.define(version: 20220420224652) do
 
   create_table "applications", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
     t.string   "token",                  null: false
@@ -22,16 +22,17 @@ ActiveRecord::Schema.define(version: 20220419000040) do
   end
 
   create_table "chats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
-    t.integer  "number",         null: false
-    t.datetime "created_at",     null: false
-    t.datetime "updated_at",     null: false
-    t.integer  "application_id", null: false
+    t.bigint   "number",                               null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.integer  "application_id",                       null: false
+    t.string   "name",           default: "chat name", null: false
+    t.integer  "messages_count", default: 0,           null: false
     t.index ["application_id"], name: "index_chats_on_application_id", using: :btree
-    t.index ["number"], name: "index_chats_on_number", unique: true, using: :btree
   end
 
   create_table "messages", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" do |t|
-    t.integer  "number",                   null: false
+    t.bigint   "number",                   null: false
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
     t.integer  "chats_id",                 null: false
