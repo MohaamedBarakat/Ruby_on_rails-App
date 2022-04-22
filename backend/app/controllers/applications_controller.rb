@@ -1,6 +1,6 @@
 class ApplicationsController < ApplicationController
   def index
-    applications_data = Application.order(created_at: :asc)
+    applications_data = Application.select('token','chat_count','name').order(created_at: :asc)
     render json: {message: "Applications Retrived successfully", data:applications_data } , status: :ok
   end
 
@@ -22,8 +22,11 @@ class ApplicationsController < ApplicationController
 
   def show
     begin
-      application = Application.where token: params[:token]
-      is_valid_token(application)
+      application = Application.select('token','chat_count','name').find_by(token: params[:token])
+
+      if !application.token
+        is_valid_token()
+      end
 
       render json: {message: "Application Retrived",application: application } , status: :ok
     rescue Exception => ex
@@ -55,10 +58,8 @@ class ApplicationsController < ApplicationController
   end
 
   private
-  def is_valid_token(application)
-    if application.count < 1
-      raise "token did not identfiy any application"
-    end  
+  def is_valid_token()
+    raise "token did not identfiy any application"
   end
 
 end

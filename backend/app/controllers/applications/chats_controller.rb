@@ -1,7 +1,10 @@
 class Applications::ChatsController < ApplicationController
   def index
     begin
-      chats = Chat.order(application_id: :asc)
+
+      application = Application.find_by(token: params[:application_token])
+      chats = Chat.select('name','number').where(application_id: application.id).order(created_at: :asc)
+
       render json: { succ_messgae: 'chats retrived successfully', data: chats } , status: :ok
     rescue Exception => ex
       render json: {error:ex ,message: "unable to fetch chats"} , status: :unprocessable_entity
@@ -11,7 +14,7 @@ class Applications::ChatsController < ApplicationController
 
   def create
     begin
-      CreateChatJob.perform_later(params[:application_token] ,params[:name])
+      CreateChatJob.perform_now(params[:application_token] ,params[:name])
       
       application = Application.where(token: params[:application_token]).first
       
