@@ -1,6 +1,7 @@
 class UpdateApplicationJob < ApplicationJob
   queue_as :default
-  #sidekiq_options queue:
+  sidekiq_options retry: false
+  
   def perform(token,new_name)
     Application.transaction do
       application = Application.find_by token: token
@@ -8,4 +9,5 @@ class UpdateApplicationJob < ApplicationJob
       application.save
     end
   end
+
 end

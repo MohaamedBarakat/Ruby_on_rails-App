@@ -6,6 +6,8 @@ class Applications::Chats::MessagesController < ApplicationController
       chat = Chat.where(application_id: application.id, number: params[:chat_number]).first
 
       messages = Message.select('number','body').where(chats_id: chat.id).order(created_at: :asc)
+      
+      message_count_update(chat.id)
 
       render json:{ succ_message: 'Messages retrived successfully', messages: messages }, status: :ok
 
@@ -27,6 +29,7 @@ class Applications::Chats::MessagesController < ApplicationController
   def update
     begin
       UpdateMessageJob.perform_now(params[:application_token],params[:chat_number],params[:number],params[:body])
+
       render json:{ succ_message: 'update Message sent successfully'}, status: :ok
 
     rescue Exception => ex
@@ -34,4 +37,13 @@ class Applications::Chats::MessagesController < ApplicationController
 
     end
   end
+
+  def message_count_update(chat_id)
+    number_of_message = Message.where(chats_id: chat_id).count
+    chat = Chat.find_by(id: chat_id)
+    chat.messages_count = number_of_message
+    chat.save!
+  end
+
 end
+

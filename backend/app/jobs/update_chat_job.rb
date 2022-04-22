@@ -1,5 +1,6 @@
 class UpdateChatJob < ApplicationJob
   queue_as :default
+  sidekiq_options retry: false
 
   def perform(token,number,new_name)
     chat = []
@@ -13,4 +14,5 @@ class UpdateChatJob < ApplicationJob
       chat.save!
     end
   end
+  
 end
