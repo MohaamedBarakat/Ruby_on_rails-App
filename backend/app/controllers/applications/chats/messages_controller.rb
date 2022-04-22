@@ -7,7 +7,7 @@ class Applications::Chats::MessagesController < ApplicationController
 
       messages = Message.select('number','body').where(chats_id: chat.id).order(created_at: :asc)
 
-      render json:{ succ_message: 'Messages retrived succefully', messages: messages }, status: :ok
+      render json:{ succ_message: 'Messages retrived successfully', messages: messages }, status: :ok
 
     rescue Exception => ex
       render json: { error:ex, message: "unable to Retrive messages"} , status: :unprocessable_entity
@@ -16,24 +16,9 @@ class Applications::Chats::MessagesController < ApplicationController
 
   def create
     begin
-      application = Application.find_by token: params[:application_token]
-
-      chat = Chat.where(application_id: application.id, number: params[:chat_number]).first
-
-      maximum_message_num = Message.select('MAX(number) AS number').group(:chats_id).having(chats_id: chat.id).first
-      if !maximum_message_num
-        maximum_message_num = 1
-      else
-        maximum_message_num = maximum_message_num.number.to_i + 1
-      end
+      CreateMessageJob.perform_now(params[:application_token],params[:chat_number],params[:body])
       
-      message = []
-      Message.transaction do
-        message = Message.new chats_id: chat.id, body: params[:body], number: maximum_message_num
-        message.save!
-      end
-      render json:{ succ_message: 'Message created succefully', message: message}, status: :ok
-      
+      render json:{ succ_message: 'Message sent to queue successfully'}, status: :ok
     rescue Exception => ex
       render json: { error:ex, message: "unable to create message"} , status: :unprocessable_entity
     end
@@ -41,17 +26,8 @@ class Applications::Chats::MessagesController < ApplicationController
 
   def update
     begin
-      application = Application.find_by token: params[:application_token]
-
-      chat = Chat.where(application_id: application.id, number: params[:chat_number]).first
-
-      message = []
-      Message.transaction do
-        message = Message.where(chats_id: chat.id , number: params[:number]).first
-        message.body = params[:body]
-        message.save!
-      end
-      render json:{ succ_message: 'Message created succefully', message: message}, status: :ok
+      UpdateMessageJob.perform_now(params[:application_token],params[:chat_number],params[:number],params[:body])
+      render json:{ succ_message: 'update Message sent successfully'}, status: :ok
 
     rescue Exception => ex
       render json: { error:ex, message: "unable to update message"} , status: :unprocessable_entity

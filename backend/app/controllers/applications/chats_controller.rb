@@ -2,7 +2,7 @@ class Applications::ChatsController < ApplicationController
   def index
     begin
       chats = Chat.order(application_id: :asc)
-      render json: { succ_messgae: 'chats retrived Succecfully', data: chats } , status: :ok
+      render json: { succ_messgae: 'chats retrived successfully', data: chats } , status: :ok
     rescue Exception => ex
       render json: {error:ex ,message: "unable to fetch chats"} , status: :unprocessable_entity
     end
@@ -11,23 +11,11 @@ class Applications::ChatsController < ApplicationController
 
   def create
     begin
-      application = []
-      Application.transaction do
-        Chat.transaction do
-          application = Application.find_by token: params[:application_token] 
-
-          num_chats = Chat.where(application_id: application.id).count
-          num_chats+=1
-
-          chat = Chat.new application_id: application.id, number: num_chats,name: params[:name]
-
-          application.chat_count = Chat.where(application_id: application.id).count + 1
-
-          chat.save!
-          application.save!
-        end
-      end
-      render json: { succ_messgae: 'Chat Created Succecfully', number_of_chats:  application.chat_count } , status: :created
+      CreateChatJob.perform_later(params[:application_token] ,params[:name])
+      
+      application = Application.where(token: params[:application_token]).first
+      
+      render json: { succ_messgae: 'Chat Created successfully', number_of_chats:  application.chat_count } , status: :created
 
     rescue Exception => ex
       render json: { error:ex, message: "unable to Create chat"} , status: :unprocessable_entity
@@ -42,7 +30,7 @@ class Applications::ChatsController < ApplicationController
       end
       chat = Chat.where(application_id: application.id , number:params[:number]).first
 
-      render json: { succ_message: 'Chat retrived Succecfully', data: chat.slice('name' , 'number')}, status: :ok
+      render json: { succ_message: 'Chat retrived successfully', data: chat.slice('name' , 'number')}, status: :ok
     rescue Exception => ex
       render json: { error:ex, message: "unable to Retrive chat"} , status: :unprocessable_entity
     end
@@ -50,19 +38,12 @@ class Applications::ChatsController < ApplicationController
 
   def update
     begin
-      chat = []
-      Chat.transaction do
-        application = Application.find_by token: params[:application_token]
-        if !application.id
-          raise "token did not identfiy any application"
-        end
-        chat = Chat.where( application_id: application.id , number: params[:number]).first
-        chat.name = params[:name]
-        chat.save!
-      end
-      render json: { succ_message:'Chat name updated Succecfully', data: chat.slice('name' , 'number') } , status: :accepted
+      UpdateChatJob.perform_now(params[:application_token],params[:number],params[:name])
+      
+      render json: { succ_message:'Update Chat name sent to queue successfully' } , status: :accepted
     rescue Exception => ex
       render json: { error:ex, message: "unable to update chat"} , status: :unprocessable_entity
     end
   end
+
 end

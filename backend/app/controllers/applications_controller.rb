@@ -1,7 +1,7 @@
 class ApplicationsController < ApplicationController
   def index
     applications_data = Application.order(created_at: :asc)
-    render json: {message: "Applications Retrived", data:applications_data } , status: :ok
+    render json: {message: "Applications Retrived successfully", data:applications_data } , status: :ok
   end
 
   def create
@@ -9,12 +9,11 @@ class ApplicationsController < ApplicationController
     begin
       generated_token = generate_token
 
-      application = Application.new token: generated_token, name: params[:name]
-      application.save
+      CreateApplicationJob.perform_now(generated_token,params[:name])
 
       no_of_application = Application.count
 
-      render json: {message: "Application Created", number_of_applications: no_of_application } , status: :created
+      render json: {message: "Application sent successfully", number_of_applications: no_of_application } , status: :created
     rescue Exception => ex
       render json: {error:ex ,message: "Cannot Create Application"} , status: :unprocessable_entity
 
@@ -35,12 +34,8 @@ class ApplicationsController < ApplicationController
 
   def update
     begin
-      application = Application.find_by token: params[:token]
-
-      application.name = params[:name]
-      application.save
-
-      render json: {message: "Application Updated",application: application } , status: :ok
+      UpdateApplicationJob.perform_now(params[:token],params[:name])
+      render json: {message: "Application Update sent to queue successfully" } , status: :ok
     rescue Exception => ex
       render json: {error: ex ,message: "Cannot update Application"} , status: :unprocessable_entity
     end
