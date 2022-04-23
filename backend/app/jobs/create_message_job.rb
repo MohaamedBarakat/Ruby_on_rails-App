@@ -4,14 +4,16 @@ class CreateMessageJob < ApplicationJob
 
   def perform(token,number,body)
     application = Application.find_by token: token
-
+    maximum_message_num = 0
     chat = Chat.where(application_id: application.id, number: number).first
-
-    maximum_message_num = Message.select('MAX(number) AS number').group(:chats_id).having(chats_id: chat.id).first
-    if !maximum_message_num
-      maximum_message_num = 1
-    else
+    messages_exist = Message.find_by chats_id: chat.id
+    if messages_exist
+      maximum_message_num = Message.select('MAX(number) AS number').group(:chats_id).having(chats_id: chat.id).first
+    end
+    if maximum_message_num != 0
       maximum_message_num = maximum_message_num.number.to_i + 1
+    else
+      maximum_message_num = 1
     end
     
     message = []

@@ -4,13 +4,17 @@ class CreateChatJob < ApplicationJob
 
   def perform(token,name)
     application = []
+    num_chats = 0
     Application.transaction do
       Chat.transaction do
         application = Application.find_by token: token
+        chat_exist = Chat.find_by(application_id: application.id)
 
-        num_chats = Chat.select("MAX(number) AS number").group(:application_id).having(application_id: application.id).first
-
-        chat = Chat.new application_id: application.id, number: num_chats.number.to_i+1,name: name
+        if chat_exist
+          num_chats = Chat.select("MAX(number) AS number").group(:application_id).having(application_id: application.id)
+          num_chats = num_chats[0].number.to_i+1
+        end
+          chat = Chat.new application_id: application.id, number: num_chats,name: name
 
         application.chat_count = Chat.where(application_id: application.id).count + 1
 
