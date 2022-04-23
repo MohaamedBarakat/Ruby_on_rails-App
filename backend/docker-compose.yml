@@ -10,25 +10,53 @@ services:
       MYSQL_PASSWORD: 123456
     ports: 
       - "3307:3306"
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.1.1
-    container_name: elasticsearch
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elasticsearch1
     environment:
-      - node.name=elasticsearch
-      - discovery.seed_hosts=elasticsearch
-      - cluster.initial_master_nodes=elasticsearch
-      - cluster.name=docker-cluster
+      - node.name=master-node
+      - node.master=true
+      - cluster.name=es-cluster
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "cluster.initial_master_nodes=master-node"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata1:/usr/share/elasticsearch/data
+      - es-data01:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
+      - 127.0.0.1:9300:9300
+    networks:
+      - elastic
+    stdin_open: true
+    tty: true
+
+  elasticsearch2:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elasticsearch2
+    environment:
+      - node.name=data-node1
+      - node.master=false
+      - cluster.name=es-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "cluster.initial_master_nodes=master-node"
+    ports:
+      - 127.0.0.1:9301:9300
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - es-data02:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    stdin_open: true
+    tty: true
+  redis:
+      image: redis
   backend:
     build: ./
     volumes:
@@ -45,4 +73,10 @@ services:
       DB_PASSWORD: 123456
       DB_HOST: db
 volumes:
-      esdata1:
+  es-data01:
+    driver: local
+  es-data02:
+    driver: local
+networks:
+  elastic:
+   # driver: bridge
