@@ -4,7 +4,7 @@ Application-based on ruby on rails framework
 
 Make sure you are in the backend directory
 
-To run the application
+To run the following commands
 
 # Write the following command
 
