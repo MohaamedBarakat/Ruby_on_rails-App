@@ -4,7 +4,7 @@ class CreateChatJob < ApplicationJob
 
   def perform(token,name)
     application = []
-    num_chats = 0
+    num_chats = 1
     Application.transaction do
       Chat.transaction do
         application = Application.find_by token: token
