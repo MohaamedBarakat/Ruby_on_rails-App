@@ -37,7 +37,19 @@ class Applications::Chats::MessagesController < ApplicationController
 
     end
   end
+  
+  def search
+    begin
+      application = Application.find_by token: params[:application_token]
+      chat = Chat.where(application_id: application.id , number: params[:chat_number]).first
+      #message = Message.where(chats_id: chat.id).search(body: params[:body])
+      render json:{ succ_message: 'Retrived elasticsearch Messages successfully',message:[]}, status: :ok
+    rescue Exception => ex
+      render json: { error:ex, message: "Unable to serach for message"} , status: :unprocessable_entity
+    end  
+  end
 
+  private
   def message_count_update(chat_id)
     number_of_message = Message.where(chats_id: chat_id).count
     chat = Chat.find_by(id: chat_id)
