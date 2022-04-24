@@ -22,7 +22,7 @@ docker-compose run backend bundle exec rake db:migrate
 
 if you run the previous command respectively now you can the run application curl http://localhost:3000/applications
 
-# Incase you have an error with elasticseqrch exit 137 after run docker-compose you should maximize vm.max_map_count
+# Incase you have an error with elasticsearch exit 137 after run docker-compose you should maximize vm.max_map_count
 
 # - linux
 From command line
