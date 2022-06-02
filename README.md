@@ -1,6 +1,4 @@
-# instabug_backend_challenge
-
-instabug_backend_challenge Application based on ruby on rails
+Application based on ruby on rails
 
 Make sure you are in the backend directory
 
